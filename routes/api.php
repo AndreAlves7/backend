@@ -26,7 +26,7 @@ Route::middleware('auth:api')->post(
     [AuthController::class, 'auth/logout']
 );
 
-Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+// Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
 
 Route::middleware('auth:api')->group(
     function () {
