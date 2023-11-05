@@ -46,7 +46,6 @@ class StoreVcardRequest extends FormRequest
         // • "custom_data" – json data – this column can be used to add any custom data to the vCard.
         // Students are free to ignore or add any type of data to this column (json data is not restricted to
         // any structure).
-        error_log($this);
         return
             [
                 //unique phone_number
