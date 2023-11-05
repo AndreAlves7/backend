@@ -29,4 +29,22 @@ class Vcard extends Model
      * @var string
      */
     protected $keyType = 'string';
+
+
+    // 1 card has many transactions
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'vcard', 'phone_number');
+    }
+
+    public function pairTransactions()
+    {
+        return $this->hasMany(Transaction::class, 'pair_vcard', 'phone_number');
+    }
+
+    // 1 card has many categories
+    public function categories()
+    {
+        return $this->hasMany(Category::class, 'vcard', 'phone_number');
+    }
 }
