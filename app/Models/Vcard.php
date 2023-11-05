@@ -9,6 +9,16 @@ class Vcard extends Model
 {
     use HasFactory;
 
+    
+    protected $fillable = [
+        'phone_number',
+        'name',
+        'email',
+        'photo_url',
+        // 'password',
+        'confirmation_code',
+    ];
+
     /**
      * The primary key associated with the table.
      *
