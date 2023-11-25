@@ -26,10 +26,10 @@ Route::get('auth/me', [AuthController::class, 'show_me']);
 Route::middleware('auth:api')->group(
     function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::get('/me', ['App\Http\Controllers\ViewAuthUserController', 'show_me']);
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
-        Route::get('/me', ['App\Http\Controllers\ViewAuthUserController', 'show_me']);
     }
 );
 
