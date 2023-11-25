@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('auth/login', [AuthController::class, 'login']);
-Router::get('auth/me', [AuthController::class, 'show_me']);
+Route::get('auth/me', [AuthController::class, 'show_me']);
 
 Route::middleware('auth:api')->group(
     function () {
@@ -29,6 +29,7 @@ Route::middleware('auth:api')->group(
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+        Route::get('/me', ['App\Http\Controllers\ViewAuthUserController', 'show_me']);
     }
 );
 
