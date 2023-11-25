@@ -8,19 +8,22 @@ use Illuminate\Support\Facades\Route;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    private function passportAuthenticationData($username, $password)
     {
-        $passportData = [
+        return [
             'grant_type' => 'password',
             'client_id' => env('PASSPORT_PASSWORD_GRANT_ID'),
             'client_secret' => env('PASSPORT_PASSWORD_GRANT_SECRET'),
-            'username' => $request->username,
-            'password' => $request->password,
-            'scope'         => '',
+            'username' => $username,
+            'password' => $password,
+            'scope' => '',
         ];
+    }
 
-        request()->request->add($passportData);
 
+    public function login(Request $request)
+    {
+        request()->request->add($this->passportAuthenticationData($request->username, $request->password));
         $request = Request::create(env('PASSPORT_URL') . '/oauth/token', 'POST');
         $response = Route::dispatch($request);
         $errorCode = $response->getStatusCode();

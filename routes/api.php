@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\auth\AuthController;
 
 use Illuminate\Http\Request;
@@ -21,7 +23,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('auth/login', [AuthController::class, 'login']);
-Route::middleware('auth:api')->post( 
+
+Route::middleware('auth:api')->post(
     'auth/logout',
     [AuthController::class, 'logout']
 );
@@ -30,7 +33,10 @@ Route::middleware('auth:api')->post(
 
 Route::middleware('auth:api')->group(
     function () {
-       Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+        Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
 
+        Route::post('logout',  [AuthController::class, 'logout']);
+
+        Route::get('users/me', [UserController::class, 'show_me']);
     }
 );
