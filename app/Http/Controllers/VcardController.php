@@ -18,6 +18,9 @@ class VcardController extends Controller
     public function index()
     {
         //
+        $this->authorize('viewAny', Vcard::class);
+
+
         return VcardResource::collection(Vcard::all());
         // return Vcard::all();
     }
@@ -56,6 +59,9 @@ class VcardController extends Controller
     public function show(Vcard $vcard)
     {
         //show a single vcard
+        $this->authorize('view', $vcard);
+
+        
         return new VcardResource($vcard);
     }
 
@@ -65,6 +71,7 @@ class VcardController extends Controller
     public function update(Request $request, Vcard $vcard)
     {
         //
+        $this->authorize('update', $vcard);
     }
 
     /**
