@@ -45,4 +45,9 @@ class AuthController extends Controller
         $token->delete();
         return response(['msg' => 'Token revoked'], 200);
     }
+
+    public function show_me(Request $request)
+    {
+        return response()->json($request->user());
+    }
 }
