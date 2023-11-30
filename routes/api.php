@@ -1,6 +1,8 @@
 <?php
-use App\Http\Controllers\auth\AuthController;
 
+use App\Http\Controllers\auth\AuthController;
+use App\Http\Controllers\VcardController;
+use App\Http\Controllers\ViewAuthUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('/signup', [ViewAuthUserController::class, 'register']);
 
 Route::middleware('auth:api')->group(
     function () {
@@ -38,4 +41,4 @@ Route::middleware('auth:api')->group(
 //     [AuthController::class, 'logout']
 // );
 
-// Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+// Route::apiResource('/vcard', 'App\Http\Controllers\VcardController')

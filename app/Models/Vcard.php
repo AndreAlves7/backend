@@ -9,14 +9,15 @@ class Vcard extends Model
 {
     use HasFactory;
 
-    
+
     protected $fillable = [
         'phone_number',
         'name',
         'email',
         'photo_url',
-        // 'password',
+        'password',
         'confirmation_code',
+        'blocked'
     ];
 
     /**
