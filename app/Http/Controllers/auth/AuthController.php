@@ -16,7 +16,7 @@ class AuthController extends Controller
             'client_secret' => env('PASSPORT_PASSWORD_GRANT_SECRET'),
             'username' => $request->username,
             'password' => $request->password,
-            'scope'         => '',
+            'scope' => '',
         ];
 
         request()->request->add($passportData);
