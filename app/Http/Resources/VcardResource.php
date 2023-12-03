@@ -17,9 +17,11 @@ class VcardResource extends JsonResource
         return [
             'phone_number' => $this->phone_number,
             'name' => $this->name,
+            'email' => $this->email,
             'photo_url' => $this->photo_url,
             'balance' => $this->balance,
             'max_debit' => $this->max_debit,
+            'blocked' => $this->blocked,
             // 'categories' => $this->categories,
         ];
     }
