@@ -64,15 +64,46 @@ class VcardController extends Controller
         
         return new VcardResource($vcard);
     }
+/**
+ * Update the specified resource in storage.
+ */
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Vcard $vcard)
-    {
-        //
-        $this->authorize('update', $vcard);
+public function update($id, Request $request)
+{
+    // Validate the request data
+    $request->validate([
+        'name' => 'sometimes|string|max:255|nullable',
+        'email' => 'sometimes|email|max:255|nullable',
+        'confirmation_code' => 'sometimes|string|min:3|nullable',
+        'password' => 'sometimes|string|min:6|nullable',
+        'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
+    ]);
+
+    // Find the user by phone_number
+    $user = Vcard::where('phone_number', $id)->firstOrFail();
+
+    // Get the non-null fields from the request
+    $updateData = array_filter($request->all(), function ($value) {
+        return $value !== null;
+    });
+
+    // Update user fields based on non-null request data
+    $user->update($updateData);
+
+    if ($request->has('password') && $request->password !== null) {
+        $user->password = bcrypt($request->password);
     }
+
+    // Bcrypt for confirmation_code (if it exists and is not null in the request)
+    if ($request->has('confirmation_code') && $request->confirmation_code !== null) {
+        $user->confirmation_code = bcrypt($request->confirmation_code);
+    }
+
+    // Save the changes
+    $user->save();
+
+    return new VcardResource($user);
+}
 
     /**
      * Remove the specified resource from storage.
@@ -81,4 +112,5 @@ class VcardController extends Controller
     {
         //
     }
+
 }
