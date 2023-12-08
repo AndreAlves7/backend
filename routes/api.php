@@ -1,6 +1,8 @@
 <?php
-use App\Http\Controllers\auth\AuthController;
 
+use App\Http\Controllers\auth\AuthController;
+use App\Http\Controllers\VcardController;
+use App\Http\Controllers\ViewAuthUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::post('auth/confirmPassword', [AuthController::class, 'confirmPassword']);
+Route::post('/signup', [ViewAuthUserController::class, 'register']);
 
 
 Route::middleware('auth:api')->group(
@@ -31,6 +34,7 @@ Route::middleware('auth:api')->group(
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+        Route::apiResource('/user', 'App\Http\Controllers\UserController');
     }
 );
 
@@ -40,4 +44,4 @@ Route::middleware('auth:api')->group(
 //     [AuthController::class, 'logout']
 // );
 
-// Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+// Route::apiResource('/vcard', 'App\Http\Controllers\VcardController')

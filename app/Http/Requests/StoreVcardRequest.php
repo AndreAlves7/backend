@@ -54,7 +54,7 @@ class StoreVcardRequest extends FormRequest
                 'email' => 'required|email',
                 'photo_url' => 'string',
                 'password' => 'required|string',
-                'confirmation_code' => 'required|numeric|digits:3',
+                'confirmation_code' => 'required|numeric|digits:4',
                 // 'blocked' => 'required|boolean',
                 // 'balance' => 'required|numeric|min:0',
                 // 'max_debit' => 'required|numeric|min:0',
@@ -84,7 +84,7 @@ class StoreVcardRequest extends FormRequest
             'password.required' => 'A password is required',
             'confirmation_code.required' => 'A confirmation code is required',
             'confirmation_code.numeric' => 'A confirmation code must be numeric',
-            'confirmation_code.digits' => 'A confirmation code must have 3 digits',
+            'confirmation_code.digits' => 'A confirmation code must have 4 digits',
             // 'blocked.required' => 'A blocked is required',
             // 'blocked.boolean' => 'A blocked must be boolean',
             // 'balance.required' => 'A balance is required',
@@ -97,10 +97,4 @@ class StoreVcardRequest extends FormRequest
             // 'custom_data.json' => 'A custom data must be json',
         ];
     }
-
 }
-
-
-
-
-

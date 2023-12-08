@@ -8,7 +8,7 @@ use App\Http\Resources\VcardResource;
 
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
-
+use App\Http\Requests\UpdateVcardRequest;
 
 class VcardController extends Controller
 {
@@ -39,7 +39,7 @@ class VcardController extends Controller
         // $vcard->balance = $request->balance;
         // $vcard->max_debit = $request->max_debit;
         error_log($request);
-// ($request);
+        // ($request);
 
         //validar com FormRequest
         $vcard = new Vcard();
@@ -50,7 +50,6 @@ class VcardController extends Controller
         $vcard->save();
 
         return new VcardResource($vcard);
-
     }
 
     /**
@@ -60,8 +59,6 @@ class VcardController extends Controller
     {
         //show a single vcard
         $this->authorize('view', $vcard);
-
-        
         return new VcardResource($vcard);
     }
 /**
@@ -92,6 +89,12 @@ public function update($id, Request $request)
 
     if ($request->has('password') && $request->password !== null) {
         $user->password = bcrypt($request->password);
+        // $vcard->update($request->validated()); -> não funciona
+        $vcard->fill($request->validated());
+        $vcard->max_debit = $request->max_debit;
+        $vcard->blocked = $request->blocked;
+        $vcard->save();
+        return new VcardResource($vcard);
     }
 
     // Bcrypt for confirmation_code (if it exists and is not null in the request)
