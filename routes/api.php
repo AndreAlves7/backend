@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('auth/confirmPassword', [AuthController::class, 'confirmPassword']);
+
 
 Route::middleware('auth:api')->group(
     function () {

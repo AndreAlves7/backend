@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Vcard;
+
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -44,5 +49,28 @@ class AuthController extends Controller
         $token->revoke();
         $token->delete();
         return response(['msg' => 'Token revoked'], 200);
+    }
+
+    public function confirmPassword(Request $request)
+    {
+
+        $user = Vcard::where('phone_number', $request->phone_number)->firstOrFail();
+        Log::info('Confirm Password Request', ['user_password' => $user->name]);
+
+        if (!$user) {
+            return response()->json(['msg' => 'User not authenticated'], 401);
+        }
+
+        // Validate the request data (you might want to add more validation rules)
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        // Check if the provided password matches the user's actual password
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json(['msg' => 'Password confirmed'], 200);
+        } else {
+            return response()->json(['msg' => 'Incorrect password'], 401);
+        }
     }
 }
