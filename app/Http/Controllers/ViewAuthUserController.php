@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Resources\VcardResource;
 use App\Models\Vcard;
+use App\Models\User;
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ViewAuthUserController extends Controller
 {
@@ -41,6 +46,83 @@ class ViewAuthUserController extends Controller
             return new VcardResource($vcard);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error creating user'], 500);
+        }
+    }
+
+    public function update(Request $request)
+{
+    $id = $request->user()->id;
+
+    // Validate the request data
+    $request->validate([
+        'name' => 'sometimes|string|max:255|nullable',
+        'email' => 'sometimes|email|max:255|nullable',
+        'confirmation_code' => 'sometimes|string|min:3|nullable',
+        'password' => 'sometimes|string|min:6|nullable',
+        'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
+    ]);
+
+    // Find the user by phone_number
+
+    if($request->user()->user_type === 'A'){
+        $user = User::where('id', $id)->firstOrFail();
+    }else{
+        $user = Vcard::where('phone_number', $id)->firstOrFail();
+    }
+
+
+
+    // Get the non-null fields from the request
+    $updateData = array_filter($request->all(), function ($value) {
+        return $value !== null;
+    });
+
+    // Update user fields based on non-null request data
+    $user->update($updateData);
+
+    if ($request->has('password') && $request->password !== null) {
+        $user->password = bcrypt($request->password);
+    }
+
+    // Bcrypt for confirmation_code (if it exists and is not null in the request)
+    if ($request->has('confirmation_code') && $request->confirmation_code !== null) {
+        $user->confirmation_code = bcrypt($request->confirmation_code);
+    }
+
+    // Save the changes
+    $user->save();
+
+    return new VcardResource($user);
+    }
+
+    public function confirmPassword(Request $request)
+    {
+        $id = $request->user()->id;
+
+        if($request->user()->user_type === 'A'){
+            $user = User::where('id', $id)->firstOrFail();
+        }else{
+            $user = Vcard::where('phone_number', $id)->firstOrFail();
+        }
+
+        Log::info('Confirm Password Request', ['user_password' => $user->name]);
+
+        Log::info('Confirm Password Request', ['ddsasdadsa' => $request]);
+
+        if (!$user) {
+            return response()->json(['msg' => 'User not authenticated'], 401);
+        }
+
+        // Validate the request data (you might want to add more validation rules)
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        // Check if the provided password matches the user's actual password
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json(['msg' => 'Password confirmed'], 200);
+        } else {
+            return response()->json(['msg' => 'Incorrect password'], 401);
         }
     }
 }

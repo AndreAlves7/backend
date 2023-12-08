@@ -65,48 +65,48 @@ class VcardController extends Controller
  * Update the specified resource in storage.
  */
 
-public function update($id, Request $request)
-{
-    // Validate the request data
-    $request->validate([
-        'name' => 'sometimes|string|max:255|nullable',
-        'email' => 'sometimes|email|max:255|nullable',
-        'confirmation_code' => 'sometimes|string|min:3|nullable',
-        'password' => 'sometimes|string|min:6|nullable',
-        'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
-    ]);
+// public function update($id, Request $request)
+// {
+//     // Validate the request data
+//     $request->validate([
+//         'name' => 'sometimes|string|max:255|nullable',
+//         'email' => 'sometimes|email|max:255|nullable',
+//         'confirmation_code' => 'sometimes|string|min:3|nullable',
+//         'password' => 'sometimes|string|min:6|nullable',
+//         'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
+//     ]);
 
-    // Find the user by phone_number
-    $user = Vcard::where('phone_number', $id)->firstOrFail();
+//     // Find the user by phone_number
+//     $user = Vcard::where('phone_number', $id)->firstOrFail();
 
-    // Get the non-null fields from the request
-    $updateData = array_filter($request->all(), function ($value) {
-        return $value !== null;
-    });
+//     // Get the non-null fields from the request
+//     $updateData = array_filter($request->all(), function ($value) {
+//         return $value !== null;
+//     });
 
-    // Update user fields based on non-null request data
-    $user->update($updateData);
+//     // Update user fields based on non-null request data
+//     $user->update($updateData);
 
-    if ($request->has('password') && $request->password !== null) {
-        $user->password = bcrypt($request->password);
-        // $vcard->update($request->validated()); -> não funciona
-        $vcard->fill($request->validated());
-        $vcard->max_debit = $request->max_debit;
-        $vcard->blocked = $request->blocked;
-        $vcard->save();
-        return new VcardResource($vcard);
-    }
+//     if ($request->has('password') && $request->password !== null) {
+//         $user->password = bcrypt($request->password);
+//         // $vcard->update($request->validated()); -> não funciona
+//         $vcard->fill($request->validated());
+//         $vcard->max_debit = $request->max_debit;
+//         $vcard->blocked = $request->blocked;
+//         $vcard->save();
+//         return new VcardResource($vcard);
+//     }
 
-    // Bcrypt for confirmation_code (if it exists and is not null in the request)
-    if ($request->has('confirmation_code') && $request->confirmation_code !== null) {
-        $user->confirmation_code = bcrypt($request->confirmation_code);
-    }
+//     // Bcrypt for confirmation_code (if it exists and is not null in the request)
+//     if ($request->has('confirmation_code') && $request->confirmation_code !== null) {
+//         $user->confirmation_code = bcrypt($request->confirmation_code);
+//     }
 
-    // Save the changes
-    $user->save();
+//     // Save the changes
+//     $user->save();
 
-    return new VcardResource($user);
-}
+//     return new VcardResource($user);
+// }
 
     /**
      * Remove the specified resource from storage.
