@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Vcard;
+
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -16,7 +21,7 @@ class AuthController extends Controller
             'client_secret' => env('PASSPORT_PASSWORD_GRANT_SECRET'),
             'username' => $request->username,
             'password' => $request->password,
-            'scope' => '',
+            'scope'         => '',
         ];
 
         request()->request->add($passportData);

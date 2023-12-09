@@ -63,24 +63,11 @@ class VcardController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateVcardRequest $request, Vcard $vcard)
-    {
-        $this->authorize('update', $vcard);
-        // $vcard->update($request->validated()); -> não funciona
-        $vcard->fill($request->validated());
-        $vcard->max_debit = $request->max_debit;
-        $vcard->blocked = $request->blocked;
-        $vcard->save();
-        return new VcardResource($vcard);
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Vcard $vcard)
     {
         //
     }
+
 }
