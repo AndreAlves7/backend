@@ -17,8 +17,11 @@ class VcardController extends Controller
      */
     public function index()
     {
+        //
         $this->authorize('viewAny', Vcard::class);
-        return VcardResource::collection(Vcard::all()->where('deleted_at', NULL));
+
+
+        return VcardResource::collection(Vcard::all());
         // return Vcard::all();
     }
 
@@ -61,6 +64,20 @@ class VcardController extends Controller
         } else {
             return response()->json(['error' => 'Vcard not found'], 404);
         }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateVcardRequest $request, Vcard $vcard)
+    {
+        $this->authorize('update', $vcard);
+        // $vcard->update($request->validated()); -> não funciona
+        $vcard->fill($request->validated());
+        $vcard->max_debit = $request->max_debit;
+        $vcard->blocked = $request->blocked;
+        $vcard->save();
+        return new VcardResource($vcard);
     }
 
     /**
