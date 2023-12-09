@@ -17,11 +17,8 @@ class VcardController extends Controller
      */
     public function index()
     {
-        //
         $this->authorize('viewAny', Vcard::class);
-
-
-        return VcardResource::collection(Vcard::all());
+        return VcardResource::collection(Vcard::all()->where('deleted_at', NULL));
         // return Vcard::all();
     }
 
@@ -59,7 +56,11 @@ class VcardController extends Controller
     {
         //show a single vcard
         $this->authorize('view', $vcard);
-        return new VcardResource($vcard);
+        if ($vcard->deleted_at == NULL) {
+            return new VcardResource($vcard);
+        } else {
+            return response()->json(['error' => 'Vcard not found'], 404);
+        }
     }
 
     /**
@@ -69,5 +70,4 @@ class VcardController extends Controller
     {
         //
     }
-
 }

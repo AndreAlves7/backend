@@ -33,7 +33,7 @@ Route::middleware('auth:api')->group(
         Route::patch('/me', ['App\Http\Controllers\ViewAuthUserController', 'update']);
         Route::post('me/confirmPassword', [ViewAuthUserController::class, 'confirmPassword']);
 
-        
+
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
