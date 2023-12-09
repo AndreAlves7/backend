@@ -17,12 +17,8 @@ class VcardController extends Controller
      */
     public function index()
     {
-        //
         $this->authorize('viewAny', Vcard::class);
-
-
-        return VcardResource::collection(Vcard::all());
-        // return Vcard::all();
+        return VcardResource::collection(Vcard::all()->where('deleted_at', NULL));
     }
 
     /**
