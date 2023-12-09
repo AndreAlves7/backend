@@ -16,7 +16,6 @@ class VcardPolicy
         //
         // verifica se o usuário é administrador
         return $viewAuthUsers->user_type == "A";
-
     }
 
     /**
@@ -54,7 +53,8 @@ class VcardPolicy
      */
     public function delete(ViewAuthUsers $viewAuthUsers, Vcard $vcard): bool
     {
-        //
+        // only admins can delete
+        return $viewAuthUsers->user_type == "A" && $vcard->balance == 0;
     }
 
     /**
@@ -70,6 +70,7 @@ class VcardPolicy
      */
     public function forceDelete(ViewAuthUsers $viewAuthUsers, Vcard $vcard): bool
     {
-        //
+        // only admins can force delete
+        return $viewAuthUsers->user_type == "A" && $vcard->balance == 0;
     }
 }

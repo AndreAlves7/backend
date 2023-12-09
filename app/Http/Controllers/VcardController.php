@@ -81,6 +81,24 @@ class VcardController extends Controller
      */
     public function destroy(Vcard $vcard)
     {
-        //
+        //only admins can delete
+        $this->authorize('delete', $vcard);
+
+        if ($vcard->balance > 0) {
+            return response()->json(['error' => 'Vcard has balance greater than 0'], 403);
+        }
+
+        if ($vcard->transactions()->count() > 0) {
+            // soft delete all vcard transactions
+            $vcard->softDeleteTransactions();
+            // soft delete vcard
+            $vcard->deleted_at = now();
+            $vcard->save();
+        } else {
+            // hard delete
+            $vcard->delete();
+        }
+
+        return new VcardResource($vcard);
     }
 }
