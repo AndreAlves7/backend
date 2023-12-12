@@ -70,6 +70,10 @@ class ViewAuthUserController extends Controller
         $user = Vcard::where('phone_number', $id)->firstOrFail();
     }
 
+    //Verify Password if necessary
+    if ($request->password != null || $request->confirmation_code != null) {
+        $this->authorize('confirmPassword', [$user, $request]);
+    }
 
 
     // Get the non-null fields from the request
@@ -95,34 +99,44 @@ class ViewAuthUserController extends Controller
     return new VcardResource($user);
     }
 
-    public function confirmPassword(Request $request)
+public function destroy(Request $request)
     {
-        $id = $request->user()->id;
+        $payload = $request->input();
 
-        if($request->user()->user_type === 'A'){
+        foreach ($payload as $key => $value) {
+            \Log::info("Key: $key, Value: $value");
+        }
+        
+        $id = $payload['phone_number'];
+        $userType = $payload['user_type'];
+
+
+        if($userType === 'A'){
             $user = User::where('id', $id)->firstOrFail();
         }else{
             $user = Vcard::where('phone_number', $id)->firstOrFail();
         }
 
-        Log::info('Confirm Password Request', ['user_password' => $user->name]);
-
-        Log::info('Confirm Password Request', ['ddsasdadsa' => $request]);
-
-        if (!$user) {
-            return response()->json(['msg' => 'User not authenticated'], 401);
+        $this->authorize('deleteSelf', [$user, $request]);
+        
+        if ($user->balance > 0) {
+            return response()->json(['error' => 'Vcard has balance greater than 0'], 403);
         }
 
-        // Validate the request data (you might want to add more validation rules)
-        $request->validate([
-            'password' => 'required|string',
-        ]);
+        if ($user->transactions()->count() > 0) {
+            // soft delete all vcard transactions
+            $user->softDeleteTransactions();
+            // soft delete vcard
+            $user->deleted_at = now();
+            $user->save();
 
-        // Check if the provided password matches the user's actual password
-        if (Hash::check($request->password, $user->password)) {
-            return response()->json(['msg' => 'Password confirmed'], 200);
+            Log::info("Soft delete");
         } else {
-            return response()->json(['msg' => 'Incorrect password'], 401);
+            // hard delete
+            $user->delete();
+            Log::info("Hard delete");
         }
+
+        return new VcardResource($user);
     }
 }

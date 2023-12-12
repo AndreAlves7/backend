@@ -31,12 +31,16 @@ Route::middleware('auth:api')->group(
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('/me', ['App\Http\Controllers\ViewAuthUserController', 'show_me']);
         Route::patch('/me', ['App\Http\Controllers\ViewAuthUserController', 'update']);
-        Route::post('me/confirmPassword', [ViewAuthUserController::class, 'confirmPassword']);
+        Route::delete('/me', ['App\Http\Controllers\ViewAuthUserController', 'destroy']);
+        
+        // Route::post('me/confirmPassword', [ViewAuthUserController::class, 'confirmPassword']);
 
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
+        
+        // web.php
     }
 );
 
