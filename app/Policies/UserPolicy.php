@@ -82,8 +82,8 @@ class UserPolicy
         $confirmation_password = $request['confirmation_password'];
         $confirmation_pin = $request['confirmation_pin'];
     
-
-        if (!Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
+        Log::info($confirmation_pin);
+        if ($viewAuthUsers->user_type != "A" && !Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
             throw new AuthorizationException('Pin provided does not match');
         }
 
