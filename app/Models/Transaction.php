@@ -11,7 +11,18 @@ class Transaction extends Model
 {
     use HasFactory;
 
-//assiciado(pt) -> (en) associated 
+    protected $fillable = [
+        'vcard',
+        'type',
+        'value',
+        'payment_type',
+        'payment_reference',
+        'pair_vcard',
+        'category_id',
+        'description',
+    ];
+
+    //assiciado(pt) -> (en) associated 
     // 1 transaction belongs to 1 card
     public function vcardAssociated()
     {

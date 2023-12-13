@@ -33,6 +33,7 @@ Route::middleware('auth:api')->group(
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
+        Route::apiResource('/transaction', 'App\Http\Controllers\TransactionController');
     }
 );
 
