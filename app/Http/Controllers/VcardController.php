@@ -62,6 +62,15 @@ class VcardController extends Controller
         }
     }
 
+     /**
+     * Display a listing of the resources transactions.
+     */
+    public function getTransactions(Vcard $vcard)
+    {
+        // $this->authorize('viewAny', Vcard::class);
+        return $vcard->transactions();
+    }
+
     /**
      * Update the specified resource in storage.
      */

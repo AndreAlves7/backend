@@ -38,6 +38,8 @@ Route::middleware('auth:api')->group(
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
+        Route::get('/vcard/transactions', ['App\Http\Controllers\VcardController', 'getTransactions']);
+
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
         
         // web.php
