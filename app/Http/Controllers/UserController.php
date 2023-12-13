@@ -35,7 +35,6 @@ class UserController extends Controller
         $user->save();
 
         return new UserResource($user);
-
     }
 
     /**
@@ -64,6 +63,5 @@ class UserController extends Controller
         $this->authorize('delete', $user);
 
         $user->delete();
-
     }
 }

@@ -25,10 +25,16 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::post('/signup', [ViewAuthUserController::class, 'register']);
 
+
 Route::middleware('auth:api')->group(
     function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('/me', ['App\Http\Controllers\ViewAuthUserController', 'show_me']);
+        Route::patch('/me', ['App\Http\Controllers\ViewAuthUserController', 'update']);
+        Route::delete('/me', ['App\Http\Controllers\ViewAuthUserController', 'destroy']);
+        
+        // Route::post('me/confirmPassword', [ViewAuthUserController::class, 'confirmPassword']);
+
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');

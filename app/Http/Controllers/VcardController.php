@@ -8,7 +8,7 @@ use App\Http\Resources\VcardResource;
 
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
-
+use App\Http\Requests\UpdateVcardRequest;
 
 class VcardController extends Controller
 {
@@ -17,12 +17,8 @@ class VcardController extends Controller
      */
     public function index()
     {
-        //
         $this->authorize('viewAny', Vcard::class);
-
-
-        return VcardResource::collection(Vcard::all());
-        // return Vcard::all();
+        return VcardResource::collection(Vcard::all()->where('deleted_at', NULL));
     }
 
     /**
@@ -39,7 +35,7 @@ class VcardController extends Controller
         // $vcard->balance = $request->balance;
         // $vcard->max_debit = $request->max_debit;
         error_log($request);
-// ($request);
+        // ($request);
 
         //validar com FormRequest
         $vcard = new Vcard();
@@ -50,7 +46,6 @@ class VcardController extends Controller
         $vcard->save();
 
         return new VcardResource($vcard);
-
     }
 
     /**
@@ -60,18 +55,25 @@ class VcardController extends Controller
     {
         //show a single vcard
         $this->authorize('view', $vcard);
-
-        
-        return new VcardResource($vcard);
+        if ($vcard->deleted_at == NULL) {
+            return new VcardResource($vcard);
+        } else {
+            return response()->json(['error' => 'Vcard not found'], 404);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Vcard $vcard)
+    public function update(UpdateVcardRequest $request, Vcard $vcard)
     {
-        //
         $this->authorize('update', $vcard);
+        // $vcard->update($request->validated()); -> não funciona
+        $vcard->fill($request->validated());
+        $vcard->max_debit = $request->max_debit;
+        $vcard->blocked = $request->blocked;
+        $vcard->save();
+        return new VcardResource($vcard);
     }
 
     /**
@@ -79,6 +81,24 @@ class VcardController extends Controller
      */
     public function destroy(Vcard $vcard)
     {
-        //
+        //only admins can delete
+        $this->authorize('delete', $vcard);
+
+        if ($vcard->balance > 0) {
+            return response()->json(['error' => 'Vcard has balance greater than 0'], 403);
+        }
+
+        if ($vcard->transactions()->count() > 0) {
+            // soft delete all vcard transactions
+            $vcard->softDeleteTransactions();
+            // soft delete vcard
+            $vcard->deleted_at = now();
+            $vcard->save();
+        } else {
+            // hard delete
+            $vcard->delete();
+        }
+
+        return new VcardResource($vcard);
     }
 }

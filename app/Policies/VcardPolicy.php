@@ -5,6 +5,12 @@ namespace App\Policies;
 use App\Models\Vcard;
 use App\Models\ViewAuthUsers;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Access\AuthorizationException;
+
 
 class VcardPolicy
 {
@@ -16,7 +22,6 @@ class VcardPolicy
         //
         // verifica se o usuário é administrador
         return $viewAuthUsers->user_type == "A";
-
     }
 
     /**
@@ -54,8 +59,35 @@ class VcardPolicy
      */
     public function delete(ViewAuthUsers $viewAuthUsers, Vcard $vcard): bool
     {
-        //
+        // only admins can delete
+         return $viewAuthUsers->user_type == "A" && $vcard->balance == 0;
+    }   
+
+    public function deleteSelf(ViewAuthUsers $viewAuthUsers, Vcard $model, Request $request): bool
+    {        
+        $confirmation_password = $request['confirmation_password'];
+        $confirmation_pin = $request['confirmation_pin'];
+    
+        if ($viewAuthUsers->user_type === "A") {
+            throw new AuthorizationException('Admins cannot delete themselves');
+        }
+        
+        if (intval($model->balance) != 0) {
+            throw new AuthorizationException('Balance must be 0 to delete');
+        }
+        
+        if (!Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
+            throw new AuthorizationException('Pin provided does not match');
+        }
+        
+        if (!Hash::check($confirmation_password, $viewAuthUsers->password)) {
+            throw new AuthorizationException('Password provided does not match');
+        }
+        
+        return true;        
     }
+
+
 
     /**
      * Determine whether the user can restore the model.
@@ -70,6 +102,25 @@ class VcardPolicy
      */
     public function forceDelete(ViewAuthUsers $viewAuthUsers, Vcard $vcard): bool
     {
-        //
+        // only admins can force delete
+        return $viewAuthUsers->user_type == "A" && $vcard->balance == 0;
     }
+
+    public function confirmPassword(ViewAuthUsers $viewAuthUsers, Vcard $model, Request $request): bool
+    {
+        $confirmation_password = $request['confirmation_password'];
+        $confirmation_pin = $request['confirmation_pin'];
+    
+
+        if (!Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
+            throw new AuthorizationException('Pin provided does not match');
+        }
+
+        if (!Hash::check($confirmation_password, $viewAuthUsers->password)) {
+            throw new AuthorizationException('Password provided does not match');
+        }
+
+        return true;
+    }
+
 }

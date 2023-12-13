@@ -5,6 +5,11 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\ViewAuthUsers;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class UserPolicy
 {
@@ -71,4 +76,22 @@ class UserPolicy
         //
         return $viewAuthUsers->user_type == "A";
     }
+
+    public function confirmPassword(ViewAuthUsers $viewAuthUsers, User $model, Request $request): bool
+    {
+        $confirmation_password = $request['confirmation_password'];
+        $confirmation_pin = $request['confirmation_pin'];
+    
+        Log::info($confirmation_pin);
+        if ($viewAuthUsers->user_type != "A" && !Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
+            throw new AuthorizationException('Pin provided does not match');
+        }
+
+        if (!Hash::check($confirmation_password, $viewAuthUsers->password)) {
+            throw new AuthorizationException('Password provided does not match');
+        }
+
+        return true;
+    }
+
 }

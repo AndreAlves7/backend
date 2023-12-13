@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Resources\VcardResource;
 use App\Models\Vcard;
+use App\Models\User;
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ViewAuthUserController extends Controller
 {
@@ -42,5 +47,96 @@ class ViewAuthUserController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error creating user'], 500);
         }
+    }
+
+    public function update(Request $request)
+{
+    $id = $request->user()->id;
+
+    // Validate the request data
+    $request->validate([
+        'name' => 'sometimes|string|max:255|nullable',
+        'email' => 'sometimes|email|max:255|nullable',
+        'confirmation_code' => 'sometimes|string|min:3|nullable',
+        'password' => 'sometimes|string|min:6|nullable',
+        'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
+    ]);
+
+    // Find the user by phone_number
+
+    if($request->user()->user_type === 'A'){
+        $user = User::where('id', $id)->firstOrFail();
+    }else{
+        $user = Vcard::where('phone_number', $id)->firstOrFail();
+    }
+
+    //Verify Password if necessary
+    if ($request->password != null || $request->confirmation_code != null) {
+        $this->authorize('confirmPassword', [$user, $request]);
+    }
+
+
+    // Get the non-null fields from the request
+    $updateData = array_filter($request->all(), function ($value) {
+        return $value !== null;
+    });
+
+    // Update user fields based on non-null request data
+    $user->update($updateData);
+
+    if ($request->has('password') && $request->password !== null) {
+        $user->password = bcrypt($request->password);
+    }
+
+    // Bcrypt for confirmation_code (if it exists and is not null in the request)
+    if ($request->has('confirmation_code') && $request->confirmation_code !== null) {
+        $user->confirmation_code = bcrypt($request->confirmation_code);
+    }
+
+    // Save the changes
+    $user->save();
+
+    return new VcardResource($user);
+    }
+
+public function destroy(Request $request)
+    {
+        $payload = $request->input();
+
+        foreach ($payload as $key => $value) {
+            \Log::info("Key: $key, Value: $value");
+        }
+        
+        $id = $payload['phone_number'];
+        $userType = $payload['user_type'];
+
+
+        if($userType === 'A'){
+            $user = User::where('id', $id)->firstOrFail();
+        }else{
+            $user = Vcard::where('phone_number', $id)->firstOrFail();
+        }
+
+        $this->authorize('deleteSelf', [$user, $request]);
+        
+        if ($user->balance > 0) {
+            return response()->json(['error' => 'Vcard has balance greater than 0'], 403);
+        }
+
+        if ($user->transactions()->count() > 0) {
+            // soft delete all vcard transactions
+            $user->softDeleteTransactions();
+            // soft delete vcard
+            $user->deleted_at = now();
+            $user->save();
+
+            Log::info("Soft delete");
+        } else {
+            // hard delete
+            $user->delete();
+            Log::info("Hard delete");
+        }
+
+        return new VcardResource($user);
     }
 }

@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Vcard;
+
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -16,8 +21,20 @@ class AuthController extends Controller
             'client_secret' => env('PASSPORT_PASSWORD_GRANT_SECRET'),
             'username' => $request->username,
             'password' => $request->password,
-            'scope' => '',
+            'scope'         => '',
         ];
+
+        // check if vcard is soft delete or blocked
+        if ($request->username) {
+            $vcard = Vcard::where('phone_number', $request->username)->first();
+            if ($vcard != NULL) {
+                if ($vcard->deleted_at != NULL) {
+                    return response()->json(['error' => 'User not found'], 404);
+                } else if ($vcard->blocked == 1) {
+                    return response()->json(['error' => 'User blocked'], 403);
+                }
+            }
+        }
 
         request()->request->add($passportData);
 
@@ -25,9 +42,7 @@ class AuthController extends Controller
         $response = Route::dispatch($request);
         $errorCode = $response->getStatusCode();
 
-        if (
-            $errorCode == '200'
-        ) {
+        if ($errorCode == '200') {
             return json_decode((string) $response->content(), true);
         } else {
             return response()->json(
