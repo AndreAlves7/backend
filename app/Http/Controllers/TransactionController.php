@@ -41,14 +41,13 @@ class TransactionController extends Controller
         //verificar se o vcard tem saldo suficiente e o valor esta dentro do limite do max_debit
         $vcard = Vcard::where('phone_number', $validated['vcard'])->firstOrFail();
 
-        if($validated['type'] == 'D') {
-            if($vcard->balance < $validated['value']) {
-                abort(400, 'Saldo insuficiente');
-            }
-            if($vcard->max_debit < $validated['value']) {
-                abort(400, 'Valor superior ao limite de débito');
-            }
+        if($vcard->balance < $validated['value']) {
+            abort(400, 'Saldo insuficiente');
         }
+        if($vcard->max_debit < $validated['value']) {
+            abort(400, 'Valor superior ao limite de débito');
+        }
+
 
 
         try{
