@@ -10,6 +10,7 @@ use App\Http\Resources\VcardResource;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardRequest;
+use Carbon\Carbon;
 
 class VcardController extends Controller
 {
@@ -83,7 +84,7 @@ class VcardController extends Controller
      */
     public function getTransactionsByVcard($userId)
     {
-        \Log::info($userId);
+        // Log::info($userId);
         // Example: Assuming Transaction is the model for your transactions
         $transactions = Transaction::where('vcard', $userId)->get();
         
@@ -119,4 +120,58 @@ class VcardController extends Controller
 
         return new VcardResource($vcard);
     }
+
+
+    public function getDataForStatistics($userId)
+    {
+        // Log::info($userId);
+
+        // Example: Assuming Transaction is the model for your transactions
+        $transactions = Transaction::where('vcard', $userId)->get();
+
+        // Group transactions by date and type, and calculate sum of values for each group
+        $sumsByDateAndType = collect([]);
+
+        foreach ($transactions as $transaction) {
+            $key = Carbon::parse($transaction->date)->format('Y-m') . "|{$transaction->type}";
+
+            if (!isset($sumsByDateAndType[$key])) {
+                $sumsByDateAndType[$key] = 0;
+            }
+
+            $sumsByDateAndType[$key] += $transaction->value;
+        }
+
+        // Extract unique dates and types from transactions
+        $uniqueDates = $transactions->pluck('date')->unique()->values();
+        $uniqueTypes = $transactions->pluck('type')->unique()->values();
+
+        // Create a nested associative array with date, type, and sum of values
+        $dataForStatistics = [];
+        $groupedDates = [];
+
+        foreach ($uniqueDates as $date) {
+            $groupedDates[Carbon::parse($date)->format('Y-m')][] = $date;
+        }
+
+        foreach ($uniqueTypes as $type) {
+            foreach ($groupedDates as $month => $dates) {
+                $sum = 0;
+
+                foreach ($dates as $date) {
+                    $key = "$month|$type";
+                    $sum += $sumsByDateAndType[$key] ?? 0;
+                }
+
+                $dataForStatistics[] = [
+                    'month' => $month,
+                    'type' => $type,
+                    'sum_of_values' => round($sum),
+                ];
+            }
+        }
+
+        return response()->json(['data_for_statistics' => $dataForStatistics]);
+    }
+
 }

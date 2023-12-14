@@ -103,9 +103,9 @@ public function destroy(Request $request)
     {
         $payload = $request->input();
 
-        foreach ($payload as $key => $value) {
-            \Log::info("Key: $key, Value: $value");
-        }
+        // foreach ($payload as $key => $value) {
+        //     \Log::info("Key: $key, Value: $value");
+        // }
         
         $id = $payload['phone_number'];
         $userType = $payload['user_type'];
