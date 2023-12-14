@@ -126,10 +126,8 @@ class VcardController extends Controller
     {
         // Log::info($userId);
 
-        // Example: Assuming Transaction is the model for your transactions
         $transactions = Transaction::where('vcard', $userId)->get();
 
-        // Group transactions by date and type, and calculate sum of values for each group
         $sumsByDateAndType = collect([]);
 
         foreach ($transactions as $transaction) {
@@ -142,11 +140,9 @@ class VcardController extends Controller
             $sumsByDateAndType[$key] += $transaction->value;
         }
 
-        // Extract unique dates and types from transactions
         $uniqueDates = $transactions->pluck('date')->unique()->values();
         $uniqueTypes = $transactions->pluck('type')->unique()->values();
 
-        // Create a nested associative array with date, type, and sum of values
         $dataForStatistics = [];
         $groupedDates = [];
 
