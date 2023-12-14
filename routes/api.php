@@ -3,6 +3,7 @@
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\VcardController;
 use App\Http\Controllers\ViewAuthUserController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,7 @@ Route::middleware('auth:api')->group(
 
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
-        Route::get('/vcard/transactions', ['App\Http\Controllers\VcardController', 'getTransactions']);
+        Route::get('/vcard/transaction/{userId}', ['App\Http\Controllers\VcardController', 'getTransactionsByVcard']);
 
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
         

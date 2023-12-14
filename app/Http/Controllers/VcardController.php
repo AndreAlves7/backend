@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vcard;
+use App\Models\Transaction;
 use App\Http\Resources\VcardResource;
 
 use Illuminate\Support\Facades\Log;
@@ -62,14 +63,6 @@ class VcardController extends Controller
         }
     }
 
-     /**
-     * Display a listing of the resources transactions.
-     */
-    public function getTransactions(Vcard $vcard)
-    {
-        // $this->authorize('viewAny', Vcard::class);
-        return $vcard->transactions();
-    }
 
     /**
      * Update the specified resource in storage.
@@ -83,6 +76,22 @@ class VcardController extends Controller
         $vcard->blocked = $request->blocked;
         $vcard->save();
         return new VcardResource($vcard);
+    }
+
+       /**
+     * Display a listing of the resources transactions.
+     */
+    public function getTransactionsByVcard($userId)
+    {
+        \Log::info($userId);
+        // Example: Assuming Transaction is the model for your transactions
+        $transactions = Transaction::where('vcard', $userId)->get();
+        
+        // Convert the data to an array
+        $responseData = ['transactions' => $transactions->toArray()];
+    
+        // Return a JSON response
+        return response()->json($responseData);
     }
 
     /**
