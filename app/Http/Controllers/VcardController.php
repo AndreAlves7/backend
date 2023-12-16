@@ -118,9 +118,12 @@ class VcardController extends Controller
     }
 
 
-    public function getDataForStatistics($userId)
+    public function getDataForStatistics($userId, $userType)
     {
-        $transactions = Transaction::where('vcard', $userId)->get();
+        $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
+            $query->where('vcard', $userId);
+        })
+        ->get();
 
         $sumsByDateAndType = collect([]);
         
@@ -164,9 +167,11 @@ class VcardController extends Controller
     }
 
 
-    public function getTotalUsageOfPaymentMethod($userId)
+    public function getTotalUsageOfPaymentMethod($userId, $userType)
     {
-        $transactions = Transaction::where('vcard', $userId)
+        $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
+                $query->where('vcard', $userId);
+            })
             ->select('payment_type', \DB::raw('count(*) as total'))
             ->groupBy('payment_type')
             ->get();
@@ -174,17 +179,21 @@ class VcardController extends Controller
         return $transactions;
     }
 
-    public function getTotalUsageAndMaxValue($userId)
+
+    public function getTotalUsageAndMaxValue($userId, $userType)
     {
-    $transactions = Transaction::where('vcard', $userId)->get();
-
-    $totalSum = $transactions->sum('value');
-
-    $maxValueTransaction = $transactions->max('value');
-
-    return [
-        'totalSum' =>  round($totalSum),
-        'maxValue' =>  round($maxValueTransaction),
-    ];
+        
+        $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
+                $query->where('vcard', $userId);
+            })
+            ->get();
+    
+        $totalSum = $transactions->sum('value');
+        $maxValueTransaction = $transactions->max('value');
+    
+        return [    
+            'totalSum' => round($totalSum),
+            'maxValue' => round($maxValueTransaction),
+        ];
     }
 }
