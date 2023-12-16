@@ -115,8 +115,8 @@ class TransactionController extends Controller
                     //     "value": 23.79
                     // }
 
-                    $client = new Client();
-
+                    $client = new Client(['verify' => false]);
+                    // $guzzleClient = new \GuzzleHttp\Client(['verify' => false]);
 
                     //----
 
