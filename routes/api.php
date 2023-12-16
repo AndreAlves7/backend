@@ -41,6 +41,8 @@ Route::middleware('auth:api')->group(
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
         Route::get('/vcard/transaction/{userId}', ['App\Http\Controllers\VcardController', 'getTransactionsByVcard']);
         Route::get('/vcard/statistics/{userId}', ['App\Http\Controllers\VcardController', 'getDataForStatistics']);
+        Route::get('/vcard/statistics/payment_types/{userId}', ['App\Http\Controllers\VcardController', 'getTotalUsageOfPaymentMethod']);
+        Route::get('/vcard/statistics/totals/{userId}', ['App\Http\Controllers\VcardController', 'getTotalUsageAndMaxValue']);
 
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
         

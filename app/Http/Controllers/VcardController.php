@@ -84,14 +84,10 @@ class VcardController extends Controller
      */
     public function getTransactionsByVcard($userId)
     {
-        // Log::info($userId);
-        // Example: Assuming Transaction is the model for your transactions
         $transactions = Transaction::where('vcard', $userId)->get();
         
-        // Convert the data to an array
         $responseData = ['transactions' => $transactions->toArray()];
     
-        // Return a JSON response
         return response()->json($responseData);
     }
 
@@ -124,12 +120,10 @@ class VcardController extends Controller
 
     public function getDataForStatistics($userId)
     {
-        // Log::info($userId);
-
         $transactions = Transaction::where('vcard', $userId)->get();
 
         $sumsByDateAndType = collect([]);
-
+        
         foreach ($transactions as $transaction) {
             $key = Carbon::parse($transaction->date)->format('Y-m') . "|{$transaction->type}";
 
@@ -152,11 +146,10 @@ class VcardController extends Controller
 
         foreach ($uniqueTypes as $type) {
             foreach ($groupedDates as $month => $dates) {
-                $sum = 0;
 
                 foreach ($dates as $date) {
                     $key = "$month|$type";
-                    $sum += $sumsByDateAndType[$key] ?? 0;
+                    $sum = $sumsByDateAndType[$key] ?? 0;
                 }
 
                 $dataForStatistics[] = [
@@ -170,4 +163,28 @@ class VcardController extends Controller
         return response()->json(['data_for_statistics' => $dataForStatistics]);
     }
 
+
+    public function getTotalUsageOfPaymentMethod($userId)
+    {
+        $transactions = Transaction::where('vcard', $userId)
+            ->select('payment_type', \DB::raw('count(*) as total'))
+            ->groupBy('payment_type')
+            ->get();
+    
+        return $transactions;
+    }
+
+    public function getTotalUsageAndMaxValue($userId)
+    {
+    $transactions = Transaction::where('vcard', $userId)->get();
+
+    $totalSum = $transactions->sum('value');
+
+    $maxValueTransaction = $transactions->max('value');
+
+    return [
+        'totalSum' =>  round($totalSum),
+        'maxValue' =>  round($maxValueTransaction),
+    ];
+    }
 }
