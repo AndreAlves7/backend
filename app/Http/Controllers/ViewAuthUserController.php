@@ -58,7 +58,7 @@ class ViewAuthUserController extends Controller
         'name' => 'sometimes|string|max:255|nullable',
         'email' => 'sometimes|email|max:255|nullable',
         'confirmation_code' => 'sometimes|string|min:3|nullable',
-        'password' => 'sometimes|string|min:6|nullable',
+        'password' => 'sometimes|string|min:3|nullable',
         'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
     ]);
 
