@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vcard;
+use App\Models\Transaction;
 use App\Http\Resources\VcardResource;
 
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardRequest;
+use Carbon\Carbon;
 
 class VcardController extends Controller
 {
@@ -62,6 +64,7 @@ class VcardController extends Controller
         }
     }
 
+
     /**
      * Update the specified resource in storage.
      */
@@ -74,6 +77,18 @@ class VcardController extends Controller
         $vcard->blocked = $request->blocked;
         $vcard->save();
         return new VcardResource($vcard);
+    }
+
+       /**
+     * Display a listing of the resources transactions.
+     */
+    public function getTransactionsByVcard($userId)
+    {
+        $transactions = Transaction::where('vcard', $userId)->get();
+        
+        $responseData = ['transactions' => $transactions->toArray()];
+    
+        return response()->json($responseData);
     }
 
     /**
@@ -100,5 +115,85 @@ class VcardController extends Controller
         }
 
         return new VcardResource($vcard);
+    }
+
+
+    public function getDataForStatistics($userId, $userType)
+    {
+        $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
+            $query->where('vcard', $userId);
+        })
+        ->get();
+
+        $sumsByDateAndType = collect([]);
+        
+        foreach ($transactions as $transaction) {
+            $key = Carbon::parse($transaction->date)->format('Y-m') . "|{$transaction->type}";
+
+            if (!isset($sumsByDateAndType[$key])) {
+                $sumsByDateAndType[$key] = 0;
+            }
+
+            $sumsByDateAndType[$key] += $transaction->value;
+        }
+
+        $uniqueDates = $transactions->pluck('date')->unique()->values();
+        $uniqueTypes = $transactions->pluck('type')->unique()->values();
+
+        $dataForStatistics = [];
+        $groupedDates = [];
+
+        foreach ($uniqueDates as $date) {
+            $groupedDates[Carbon::parse($date)->format('Y-m')][] = $date;
+        }
+
+        foreach ($uniqueTypes as $type) {
+            foreach ($groupedDates as $month => $dates) {
+
+                foreach ($dates as $date) {
+                    $key = "$month|$type";
+                    $sum = $sumsByDateAndType[$key] ?? 0;
+                }
+
+                $dataForStatistics[] = [
+                    'month' => $month,
+                    'type' => $type,
+                    'sum_of_values' => round($sum),
+                ];
+            }
+        }
+
+        return response()->json(['data_for_statistics' => $dataForStatistics]);
+    }
+
+
+    public function getTotalUsageOfPaymentMethod($userId, $userType)
+    {
+        $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
+                $query->where('vcard', $userId);
+            })
+            ->select('payment_type', \DB::raw('count(*) as total'))
+            ->groupBy('payment_type')
+            ->get();
+    
+        return $transactions;
+    }
+
+
+    public function getTotalUsageAndMaxValue($userId, $userType)
+    {
+        
+        $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
+                $query->where('vcard', $userId);
+            })
+            ->get();
+    
+        $totalSum = $transactions->sum('value');
+        $maxValueTransaction = $transactions->max('value');
+    
+        return [    
+            'totalSum' => round($totalSum),
+            'maxValue' => round($maxValueTransaction),
+        ];
     }
 }

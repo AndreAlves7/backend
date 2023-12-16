@@ -58,7 +58,7 @@ class ViewAuthUserController extends Controller
         'name' => 'sometimes|string|max:255|nullable',
         'email' => 'sometimes|email|max:255|nullable',
         'confirmation_code' => 'sometimes|string|min:3|nullable',
-        'password' => 'sometimes|string|min:6|nullable',
+        'password' => 'sometimes|string|min:3|nullable',
         'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
     ]);
 
@@ -103,9 +103,9 @@ public function destroy(Request $request)
     {
         $payload = $request->input();
 
-        foreach ($payload as $key => $value) {
-            \Log::info("Key: $key, Value: $value");
-        }
+        // foreach ($payload as $key => $value) {
+        //     \Log::info("Key: $key, Value: $value");
+        // }
         
         $id = $payload['phone_number'];
         $userType = $payload['user_type'];
