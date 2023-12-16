@@ -32,7 +32,7 @@ Route::middleware('auth:api')->group(
         Route::get('/me', ['App\Http\Controllers\ViewAuthUserController', 'show_me']);
         Route::patch('/me', ['App\Http\Controllers\ViewAuthUserController', 'update']);
         Route::delete('/me', ['App\Http\Controllers\ViewAuthUserController', 'destroy']);
-        
+
         // Route::post('me/confirmPassword', [ViewAuthUserController::class, 'confirmPassword']);
 
 
