@@ -96,9 +96,18 @@ class ViewAuthUserController extends Controller
 
 
     // Get the non-null fields from the request
-    $updateData = array_filter($request->all(), function ($value) {
+    $updateData = $request->all();
+
+    // Remove the 'photo_url' key if it exists
+    $updateData = collect($updateData)->except(['photo_url'])->toArray();
+    
+    // Remove null values from the array
+    $updateData = array_filter($updateData, function ($value) {
         return $value !== null;
     });
+
+    $user->update($updateData);
+
 
     // Update user fields based on non-null request data
     if ($request->has('password') && $request->password !== null) {
@@ -114,7 +123,7 @@ class ViewAuthUserController extends Controller
      if ($request->user()->user_type !== 'A' && $request->photo_url) {
         $user->photo_url = $this->storeBase64AsFile($user, $request->photo_url, $user->photo_url);    
         }
-    // Save the changes
+    // Save the changes    
     $user->save();
 
     return new VcardResource($user);
@@ -141,13 +150,15 @@ public function destroy(Request $request)
 
         if ($user->transactions()->count() > 0) {
             // soft delete all vcard transactions
-            $user->transactions->delete();
+            $user->transactions()->delete();
             // soft delete vcard
             $user->delete();
             Log::info("Soft delete");
         } else {
             // hard delete
-            $vcard->forceDelete();
+            $user->categories()->forceDelete();
+            $user->forceDelete();
+            
             Log::info("Hard delete");
         }
 
