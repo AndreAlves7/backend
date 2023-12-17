@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Resources\VcardResource;
 use App\Models\Vcard;
+use App\Models\Category;
+use App\Models\DefaultCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -21,6 +23,7 @@ class ViewAuthUserController extends Controller
 
     public function register(StoreVcardRequest $request)
     {
+        $allDefaultcategories = DefaultCategory::all();
         $dataToSave = $request->validated();
 
         $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
@@ -43,8 +46,19 @@ class ViewAuthUserController extends Controller
 
         try {
             $vcard->save();
+
+              // Create entries in the categories table for each default category
+            foreach ($allDefaultcategories as $defaultCategory) {
+                $category = new Category();
+                $category->vcard = $vcard->phone_number;
+                $category->type = $defaultCategory->type;
+                $category->name = $defaultCategory->name;
+                $category->save();
+            }
             return new VcardResource($vcard);
+
         } catch (\Exception $e) {
+            Log::info($e);
             return response()->json(['error' => 'Error creating user'], 500);
         }
     }

@@ -9,6 +9,7 @@ class Category extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
 
     // 1 category belongs to 1 card
     public function vcardAssociated()

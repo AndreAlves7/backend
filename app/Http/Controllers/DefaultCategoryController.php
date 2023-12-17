@@ -46,9 +46,6 @@ class DefaultCategoryController extends Controller
 
         $category = DefaultCategory::findOrFail($id);
 
-
-        Log::info($request->input('type'));
-
         $category->update([
             'type' => $request->input('type') ?? $category->type,
             'name' => $request->input('name') ?? $category->name,
