@@ -47,6 +47,8 @@ Route::middleware('auth:api')->group(
 
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
         Route::apiResource('/transaction', 'App\Http\Controllers\TransactionController');
+        Route::apiResource('/category', 'App\Http\Controllers\CategoryController');
+
     }
 );
 
