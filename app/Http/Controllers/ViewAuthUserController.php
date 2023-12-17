@@ -10,11 +10,13 @@ use App\Models\DefaultCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\Base64Services;
+use App\Http\Requests\PatchViewAuthUserRequest; 
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use \Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\File;
+
 class ViewAuthUserController extends Controller
 {
     private function storeBase64AsFile(Vcard $user, String $base64String, ?String $photoToDelete)
@@ -72,18 +74,12 @@ class ViewAuthUserController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(PatchViewAuthUserRequest $request)
 {
     $id = $request->user()->id;
 
     // Validate the request data
-    $request->validate([
-        'name' => 'sometimes|string|max:255|nullable',
-        'email' => 'sometimes|email|max:255|nullable',
-        'confirmation_code' => 'sometimes|string|min:3|nullable',
-        'password' => 'sometimes|string|min:3|nullable',
-        'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
-    ]);
+    $request->validated();
 
     // Find the user by phone_number
 
