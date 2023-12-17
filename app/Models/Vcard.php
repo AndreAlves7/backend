@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vcard extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
 
     protected $fillable = [
@@ -59,8 +61,8 @@ class Vcard extends Model
         return $this->hasMany(Category::class, 'vcard', 'phone_number');
     }
 
-    public function softDeleteTransactions()
-    {
-        $this->transactions()->update(['deleted_at' => now()]);
-    }
+    // public function softDeleteTransactions()
+    // {
+    //     $this->transactions()->update(['deleted_at' => now()]);
+    // }
 }

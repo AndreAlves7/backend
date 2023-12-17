@@ -38,7 +38,7 @@ class CategoryPolicy
      */
     public function update(ViewAuthUsers $viewAuthUsers, Category $category): bool
     {
-        return $viewAuthUsers->username == $category->vcard;
+        return $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $category->vcard;
     }
 
     /**

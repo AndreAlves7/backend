@@ -60,31 +60,31 @@ class VcardPolicy
     public function delete(ViewAuthUsers $viewAuthUsers, Vcard $vcard): bool
     {
         // only admins can delete
-         return $viewAuthUsers->user_type == "A" && $vcard->balance == 0;
-    }   
+        return $viewAuthUsers->user_type == "A" && $vcard->balance == 0;
+    }
 
     public function deleteSelf(ViewAuthUsers $viewAuthUsers, Vcard $model, Request $request): bool
-    {        
+    {
         $confirmation_password = $request['confirmation_password'];
         $confirmation_pin = $request['confirmation_pin'];
-    
+
         if ($viewAuthUsers->user_type === "A") {
             throw new AuthorizationException('Admins cannot delete themselves');
         }
-        
+
         if (intval($model->balance) != 0) {
             throw new AuthorizationException('Balance must be 0 to delete');
         }
-        
+
         if (!Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
             throw new AuthorizationException('Pin provided does not match');
         }
-        
+
         if (!Hash::check($confirmation_password, $viewAuthUsers->password)) {
             throw new AuthorizationException('Password provided does not match');
         }
-        
-        return true;        
+
+        return true;
     }
 
 
@@ -110,7 +110,7 @@ class VcardPolicy
     {
         $confirmation_password = $request['confirmation_password'];
         $confirmation_pin = $request['confirmation_pin'];
-    
+
 
         if (!Hash::check($confirmation_pin, $viewAuthUsers->confirmation_code)) {
             throw new AuthorizationException('Pin provided does not match');
@@ -123,4 +123,8 @@ class VcardPolicy
         return true;
     }
 
+    public function viewVcardCategories(ViewAuthUsers $viewAuthUsers, Vcard $vcard): bool
+    {
+        return $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $vcard->phone_number;
+    }
 }

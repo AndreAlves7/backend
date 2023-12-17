@@ -10,6 +10,7 @@ use App\Http\Resources\VcardResource;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardRequest;
+use App\Http\Resources\CategoryResource;
 use Carbon\Carbon;
 
 class VcardController extends Controller
@@ -20,7 +21,7 @@ class VcardController extends Controller
     public function index()
     {
         $this->authorize('viewAny', Vcard::class);
-        return VcardResource::collection(Vcard::all()->where('deleted_at', NULL));
+        return VcardResource::collection(Vcard::all());
     }
 
     /**
@@ -57,11 +58,7 @@ class VcardController extends Controller
     {
         //show a single vcard
         $this->authorize('view', $vcard);
-        if ($vcard->deleted_at == NULL) {
-            return new VcardResource($vcard);
-        } else {
-            return response()->json(['error' => 'Vcard not found'], 404);
-        }
+        return new VcardResource($vcard);
     }
 
 
@@ -105,13 +102,12 @@ class VcardController extends Controller
 
         if ($vcard->transactions()->count() > 0) {
             // soft delete all vcard transactions
-            $vcard->softDeleteTransactions();
+            $vcard->transactions()->delete();
             // soft delete vcard
-            $vcard->deleted_at = now();
-            $vcard->save();
+            $vcard->delete();
         } else {
             // hard delete
-            $vcard->delete();
+            $vcard->forceDelete();
         }
 
         return new VcardResource($vcard);
@@ -195,5 +191,11 @@ class VcardController extends Controller
             'totalSum' => round($totalSum),
             'maxValue' => round($maxValueTransaction),
         ];
+    }
+
+    public function getCategoriesByVcard(Vcard $vcard)
+    {
+        $this->authorize('viewVcardCategories', $vcard);
+        return CategoryResource::collection($vcard->categories->where('deleted_at', NULL));
     }
 }
