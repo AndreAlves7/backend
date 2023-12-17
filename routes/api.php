@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\auth\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\VcardController;
 use App\Http\Controllers\ViewAuthUserController;
 
@@ -40,13 +41,16 @@ Route::middleware('auth:api')->group(
         //policies in the controller
         Route::apiResource('/vcard', 'App\Http\Controllers\VcardController');
         Route::get('/vcard/transaction/{userId}', ['App\Http\Controllers\VcardController', 'getTransactionsByVcard']);
-        
+        Route::get('/vcard/{userId}/category', ['App\Http\Controllers\CategoryController', 'getCategoriesByVcard']);
+
         Route::get('/vcard/statistics/{userId}/{userType}', ['App\Http\Controllers\VcardController', 'getDataForStatistics']);
         Route::get('/vcard/statistics/payment_types/{userId}/{userType}', ['App\Http\Controllers\VcardController', 'getTotalUsageOfPaymentMethod']);
         Route::get('/vcard/statistics/totals/{userId}/{userType}', ['App\Http\Controllers\VcardController', 'getTotalUsageAndMaxValue']);
 
         Route::apiResource('/user', 'App\Http\Controllers\UserController');
         Route::apiResource('/transaction', 'App\Http\Controllers\TransactionController');
+
+        Route::apiResource('/category', 'App\Http\Controllers\CategoryController');
     }
 );
 

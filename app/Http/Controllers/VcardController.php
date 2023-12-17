@@ -79,15 +79,15 @@ class VcardController extends Controller
         return new VcardResource($vcard);
     }
 
-       /**
+    /**
      * Display a listing of the resources transactions.
      */
     public function getTransactionsByVcard($userId)
     {
         $transactions = Transaction::where('vcard', $userId)->get();
-        
+
         $responseData = ['transactions' => $transactions->toArray()];
-    
+
         return response()->json($responseData);
     }
 
@@ -123,10 +123,10 @@ class VcardController extends Controller
         $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
             $query->where('vcard', $userId);
         })
-        ->get();
+            ->get();
 
         $sumsByDateAndType = collect([]);
-        
+
         foreach ($transactions as $transaction) {
             $key = Carbon::parse($transaction->date)->format('Y-m') . "|{$transaction->type}";
 
@@ -170,28 +170,28 @@ class VcardController extends Controller
     public function getTotalUsageOfPaymentMethod($userId, $userType)
     {
         $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
-                $query->where('vcard', $userId);
-            })
+            $query->where('vcard', $userId);
+        })
             ->select('payment_type', \DB::raw('count(*) as total'))
             ->groupBy('payment_type')
             ->get();
-    
+
         return $transactions;
     }
 
 
     public function getTotalUsageAndMaxValue($userId, $userType)
     {
-        
+
         $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
-                $query->where('vcard', $userId);
-            })
+            $query->where('vcard', $userId);
+        })
             ->get();
-    
+
         $totalSum = $transactions->sum('value');
         $maxValueTransaction = $transactions->max('value');
-    
-        return [    
+
+        return [
             'totalSum' => round($totalSum),
             'maxValue' => round($maxValueTransaction),
         ];
