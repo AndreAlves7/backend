@@ -80,7 +80,7 @@ class StoreTransactionRequest extends FormRequest
                     }
                 },
             ],
-            'category_id' => 'nullable|exists:category,id',
+            'category_id' => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             ];
 
