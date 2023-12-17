@@ -16,6 +16,7 @@ class Category extends Model
         'type',
         'name'
     ];
+    public $timestamps = false;
 
     // 1 category belongs to 1 card
     public function vcardAssociated()
