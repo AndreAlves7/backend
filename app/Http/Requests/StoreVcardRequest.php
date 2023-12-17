@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\Base64Services;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreVcardRequest extends FormRequest
@@ -96,5 +97,19 @@ class StoreVcardRequest extends FormRequest
             // 'custom_options.json' => 'A custom options must be json',
             // 'custom_data.json' => 'A custom data must be json',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $photo_url = $this->photo_url ?? null;
+            if ($photo_url) {
+                $base64Service = new Base64Services();
+                $mimeType = $base64Service->mimeType($photo_url);
+                if (!in_array($mimeType, ['image/png', 'image/jpg', 'image/jpeg'])) {
+                    $validator->errors()->add('photo_url', 'File type not supported (only supports "png" and "jpeg" images).');
+                }
+            }
+        });
     }
 }

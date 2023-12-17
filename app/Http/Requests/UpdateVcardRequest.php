@@ -46,7 +46,7 @@ class UpdateVcardRequest extends FormRequest
             'name.required' => 'A name is required',
             'email.required' => 'An email is required',
             'email.email' => 'An email must be valid',
-            // 'photo_url.string' => 'A photo url must be a string',
+            'photo_url.string' => 'A photo url must be a string',
             'blocked.required' => 'A blocked is required',
             'blocked.boolean' => 'A blocked must be boolean',
             'max_debit.required' => 'A max debit is required',

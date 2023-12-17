@@ -10,11 +10,13 @@ use App\Models\DefaultCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\Base64Services;
+use App\Http\Requests\PatchViewAuthUserRequest; 
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use \Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\File;
+
 class ViewAuthUserController extends Controller
 {
     private function storeBase64AsFile(Vcard $user, String $base64String, ?String $photoToDelete)
@@ -72,18 +74,12 @@ class ViewAuthUserController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(PatchViewAuthUserRequest $request)
 {
     $id = $request->user()->id;
 
     // Validate the request data
-    $request->validate([
-        'name' => 'sometimes|string|max:255|nullable',
-        'email' => 'sometimes|email|max:255|nullable',
-        'confirmation_code' => 'sometimes|string|min:3|nullable',
-        'password' => 'sometimes|string|min:3|nullable',
-        'profilePhoto' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
-    ]);
+    $request->validated();
 
     // Find the user by phone_number
 
@@ -100,9 +96,18 @@ class ViewAuthUserController extends Controller
 
 
     // Get the non-null fields from the request
-    $updateData = array_filter($request->all(), function ($value) {
+    $updateData = $request->all();
+
+    // Remove the 'photo_url' key if it exists
+    $updateData = collect($updateData)->except(['photo_url'])->toArray();
+    
+    // Remove null values from the array
+    $updateData = array_filter($updateData, function ($value) {
         return $value !== null;
     });
+
+    $user->update($updateData);
+
 
     // Update user fields based on non-null request data
     if ($request->has('password') && $request->password !== null) {
@@ -118,7 +123,7 @@ class ViewAuthUserController extends Controller
      if ($request->user()->user_type !== 'A' && $request->photo_url) {
         $user->photo_url = $this->storeBase64AsFile($user, $request->photo_url, $user->photo_url);    
         }
-    // Save the changes
+    // Save the changes    
     $user->save();
 
     return new VcardResource($user);
@@ -145,15 +150,15 @@ public function destroy(Request $request)
 
         if ($user->transactions()->count() > 0) {
             // soft delete all vcard transactions
-            $user->softDeleteTransactions();
+            $user->transactions()->delete();
             // soft delete vcard
-            $user->deleted_at = now();
-            $user->save();
-
+            $user->delete();
             Log::info("Soft delete");
         } else {
             // hard delete
-            $user->delete();
+            $user->categories()->forceDelete();
+            $user->forceDelete();
+            
             Log::info("Hard delete");
         }
 
