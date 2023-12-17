@@ -69,7 +69,7 @@ class TransactionController extends Controller
                 //----
                 $transaction->old_balance = $associated->balance;
 
-                if ($validated['type']) {
+                if ($validated['type'] == 'C') {
                     $transaction->new_balance = $associated->balance + $transaction->value;
                 } else {
                     $transaction->new_balance = $associated->balance - $transaction->value;

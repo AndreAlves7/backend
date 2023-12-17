@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-
-use Illuminate\Http\Request;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
-use App\Models\Vcard;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -29,25 +28,21 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Category $category)
     {
-        //
-        //return vcard
-        //emprimira para o laravel.log
-       $vcard = Vcard::where('phone_number', $id)->firstOrFail();
-       return response()->json($vcard->categories);
-
-
-
-        
+        $this->authorize('view', $category);
+        return new CategoryResource($category);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        //
+        $this->authorize('update', $category);
+        $category->fill($request->validated());
+        $category->save();
+        return new CategoryResource($category);
     }
 
     /**
