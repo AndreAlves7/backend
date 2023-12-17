@@ -67,8 +67,6 @@ class CategoryPolicy
 
     public function viewVcardCategories(ViewAuthUsers $viewAuthUsers, string $vcard): bool
     {
-        Log::info($vcard);
-        Log::info($viewAuthUsers->username);
         return $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $vcard;
     }
 }
