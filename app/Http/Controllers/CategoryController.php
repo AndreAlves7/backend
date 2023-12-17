@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
@@ -20,9 +21,12 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        //
+        $category = new Category();
+        $category->fill($request->validated());
+        $category->save();
+        return new CategoryResource($category);
     }
 
     /**
@@ -48,8 +52,18 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
-        //
+        $this->authorize('delete', $category);
+        if ($category->transactions()->count() > 0) {
+            // soft delete all categories
+            $category->transactions()->delete();
+            // soft delete vcard
+            $category->delete();
+        } else {
+            $category->forceDelete();
+        }
+
+        return new CategoryResource($category);
     }
 }
