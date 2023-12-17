@@ -9,13 +9,22 @@ use App\Models\Category;
 use App\Models\DefaultCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Services\Base64Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
+use \Illuminate\Support\Facades\File;
 class ViewAuthUserController extends Controller
 {
+    private function storeBase64AsFile(Vcard $user, String $base64String, ?String $photoToDelete)
+    {
+        $targetDir = storage_path('app/public/fotos');
+        $newfilename = $user->id . "_" . rand(1000,9999);
+        $base64Service = new Base64Services();
+        return $base64Service->saveFile($base64String, $targetDir, $newfilename, $photoToDelete);
+    }
+
     public function show_me(Request $request)
     {
         return response()->json($request->user());
@@ -26,9 +35,9 @@ class ViewAuthUserController extends Controller
         $allDefaultcategories = DefaultCategory::all();
         $dataToSave = $request->validated();
 
-        $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
-            $dataToSave["base64ImagePhoto"] : ($dataToSave["base64ImagePhoto"] ?? null);
-        unset($dataToSave["base64ImagePhoto"]);
+        $base64ImagePhoto = array_key_exists("photo_url", $dataToSave) ?
+            $dataToSave["photo_url"] : ($dataToSave["photo_url"] ?? null);
+        unset($dataToSave["photo_url"]);
 
         $vcard = new Vcard();
         $vcard->phone_number = $dataToSave['phone_number'];
@@ -41,7 +50,7 @@ class ViewAuthUserController extends Controller
 
         // Create a new photo file from base64 content
         if ($base64ImagePhoto) {
-            $vcard->photo_url = $this->storeBase64AsFile($vcard, $base64ImagePhoto);
+            $vcard->photo_url = $this->storeBase64AsFile($vcard, $base64ImagePhoto, null);
         }
 
         try {
@@ -96,8 +105,6 @@ class ViewAuthUserController extends Controller
     });
 
     // Update user fields based on non-null request data
-    $user->update($updateData);
-
     if ($request->has('password') && $request->password !== null) {
         $user->password = bcrypt($request->password);
     }
@@ -107,6 +114,10 @@ class ViewAuthUserController extends Controller
         $user->confirmation_code = bcrypt($request->confirmation_code);
     }
 
+     // Create a new photo file from base64 content
+     if ($request->user()->user_type !== 'A' && $request->photo_url) {
+        $user->photo_url = $this->storeBase64AsFile($user, $request->photo_url, $user->photo_url);    
+        }
     // Save the changes
     $user->save();
 
@@ -116,11 +127,6 @@ class ViewAuthUserController extends Controller
 public function destroy(Request $request)
     {
         $payload = $request->input();
-
-        // foreach ($payload as $key => $value) {
-        //     \Log::info("Key: $key, Value: $value");
-        // }
-        
         $id = $payload['phone_number'];
         $userType = $payload['user_type'];
 
