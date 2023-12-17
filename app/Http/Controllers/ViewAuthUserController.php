@@ -145,15 +145,13 @@ public function destroy(Request $request)
 
         if ($user->transactions()->count() > 0) {
             // soft delete all vcard transactions
-            $user->softDeleteTransactions();
+            $user->transactions->delete();
             // soft delete vcard
-            $user->deleted_at = now();
-            $user->save();
-
+            $user->delete();
             Log::info("Soft delete");
         } else {
             // hard delete
-            $user->delete();
+            $vcard->forceDelete();
             Log::info("Hard delete");
         }
 
