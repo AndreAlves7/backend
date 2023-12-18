@@ -25,12 +25,18 @@ class AuthController extends Controller
         ];
 
         // check if vcard is soft delete or blocked
+        //log
+        Log::info($request->username);
         if ($request->username) {
             $vcard = Vcard::where('phone_number', $request->username)->first();
-            if ($vcard != NULL) {
-                if ($vcard->deleted_at != NULL) {
-                    return response()->json(['error' => 'User not found'], 404);
-                } else if ($vcard->blocked == 1) {
+
+            //log vcard
+            Log::info($vcard);
+
+            if ($vcard == NULL) {
+                return response()->json(['error' => 'User not found'], 404);
+            }else{
+                if ($vcard->blocked == 1) {
                     return response()->json(['error' => 'User blocked'], 403);
                 }
             }
