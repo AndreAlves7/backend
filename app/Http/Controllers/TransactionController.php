@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Requests\PatchTransactionRequest;
 use App\Models\Transaction;
 use App\Models\Vcard;
 use Illuminate\Support\Facades\DB;
@@ -166,17 +167,29 @@ class TransactionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Transaction $transaction)
     {
         //
+        return $transaction;
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(PatchTransactionRequest $request, string $id)
     {
         //
+        //patch transaction
+        $validated = $request->validated();
+
+        $transaction = Transaction::findOrFail($id);
+
+        $transaction->fill($validated);
+
+        $transaction->save();
+
+        return $transaction;
     }
 
     /**
