@@ -53,6 +53,8 @@ class ViewAuthUserController extends Controller
         // Create a new photo file from base64 content
         if ($base64ImagePhoto) {
             $vcard->photo_url = $this->storeBase64AsFile($vcard, $base64ImagePhoto, null);
+        }else{
+            $vcard->photo_url = null;
         }
 
         try {

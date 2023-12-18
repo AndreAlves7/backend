@@ -53,7 +53,7 @@ class StoreVcardRequest extends FormRequest
                 'phone_number' => 'required|numeric|digits:9|starts_with:9|unique:vcards,phone_number',
                 'name' => 'required|string',
                 'email' => 'required|email',
-                'photo_url' => 'string',
+                'photo_url' => 'string|nullable',
                 'password' => 'required|string',
                 'confirmation_code' => 'required|numeric|digits:3',
                 // 'blocked' => 'required|boolean',

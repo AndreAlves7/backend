@@ -10,7 +10,6 @@ use App\Http\Resources\VcardResource;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardRequest;
-use App\Http\Resources\CategoryResource;
 use Carbon\Carbon;
 
 class VcardController extends Controller
@@ -21,7 +20,7 @@ class VcardController extends Controller
     public function index()
     {
         $this->authorize('viewAny', Vcard::class);
-        return VcardResource::collection(Vcard::all());
+        return VcardResource::collection(Vcard::all()->where('deleted_at', NULL));
     }
 
     /**
@@ -58,7 +57,11 @@ class VcardController extends Controller
     {
         //show a single vcard
         $this->authorize('view', $vcard);
-        return new VcardResource($vcard);
+        if ($vcard->deleted_at == NULL) {
+            return new VcardResource($vcard);
+        } else {
+            return response()->json(['error' => 'Vcard not found'], 404);
+        }
     }
 
 
@@ -76,15 +79,15 @@ class VcardController extends Controller
         return new VcardResource($vcard);
     }
 
-    /**
+       /**
      * Display a listing of the resources transactions.
      */
     public function getTransactionsByVcard($userId)
     {
         $transactions = Transaction::where('vcard', $userId)->get();
-
+        
         $responseData = ['transactions' => $transactions->toArray()];
-
+    
         return response()->json($responseData);
     }
 
@@ -102,12 +105,13 @@ class VcardController extends Controller
 
         if ($vcard->transactions()->count() > 0) {
             // soft delete all vcard transactions
-            $vcard->transactions()->delete();
+            $vcard->softDeleteTransactions();
             // soft delete vcard
-            $vcard->delete();
+            $vcard->deleted_at = now();
+            $vcard->save();
         } else {
             // hard delete
-            $vcard->forceDelete();
+            $vcard->delete();
         }
 
         return new VcardResource($vcard);
@@ -116,13 +120,19 @@ class VcardController extends Controller
 
     public function getDataForStatistics($userId, $userType)
     {
+        Log::info('ola');
         $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
             $query->where('vcard', $userId);
         })
-            ->get();
+        ->select('date', 'type', 'value')
+        ->get();
+
+        //log transactions
+        // Log::info($transactions);
+  
 
         $sumsByDateAndType = collect([]);
-
+        
         foreach ($transactions as $transaction) {
             $key = Carbon::parse($transaction->date)->format('Y-m') . "|{$transaction->type}";
 
@@ -166,28 +176,29 @@ class VcardController extends Controller
     public function getTotalUsageOfPaymentMethod($userId, $userType)
     {
         $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
-            $query->where('vcard', $userId);
-        })
+                $query->where('vcard', $userId);
+            })
             ->select('payment_type', \DB::raw('count(*) as total'))
             ->groupBy('payment_type')
             ->get();
-
+    
         return $transactions;
     }
 
 
     public function getTotalUsageAndMaxValue($userId, $userType)
     {
-
+        
         $transactions = Transaction::when($userType != 'A', function ($query) use ($userId) {
-            $query->where('vcard', $userId);
-        })
+                $query->where('vcard', $userId);
+            })
+            ->select('value')
             ->get();
-
+    
         $totalSum = $transactions->sum('value');
         $maxValueTransaction = $transactions->max('value');
-
-        return [
+    
+        return [    
             'totalSum' => round($totalSum),
             'maxValue' => round($maxValueTransaction),
         ];
@@ -196,6 +207,6 @@ class VcardController extends Controller
     public function getCategoriesByVcard(Vcard $vcard)
     {
         $this->authorize('viewVcardCategories', $vcard);
-        return CategoryResource::collection($vcard->categories->where('deleted_at', NULL));
+        return CategoryResource::collection($vcard->categories->all());
     }
 }
