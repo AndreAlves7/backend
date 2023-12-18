@@ -21,7 +21,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        $this->authorize('viewAny', Transaction::class);
         return Transaction::all();
     }
 
@@ -32,8 +32,6 @@ class TransactionController extends Controller
     {
         //
         //transacao de debito
-
-
 
         $validated = $request->validated();
 
@@ -169,9 +167,8 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        //
+        $this->authorize('view', $transaction);
         return $transaction;
-
     }
 
     /**
@@ -179,11 +176,12 @@ class TransactionController extends Controller
      */
     public function update(PatchTransactionRequest $request, string $id)
     {
-        //
         //patch transaction
         $validated = $request->validated();
 
         $transaction = Transaction::findOrFail($id);
+
+        $this->authorize('update', $transaction);
 
         $transaction->fill($validated);
 
