@@ -13,7 +13,7 @@ class TransactionPolicy
      */
     public function viewAny(ViewAuthUsers $viewAuthUsers): bool
     {
-        $viewAuthUsers->user_type == "A";
+        return $viewAuthUsers->user_type == "A";
     }
 
     /**
@@ -21,7 +21,7 @@ class TransactionPolicy
      */
     public function view(ViewAuthUsers $viewAuthUsers, Transaction $transaction): bool
     {
-        $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $transaction->vcard;
+        return $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $transaction->vcard;
     }
 
     /**
@@ -37,7 +37,7 @@ class TransactionPolicy
      */
     public function update(ViewAuthUsers $viewAuthUsers, Transaction $transaction): bool
     {
-        $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $transaction->vcard;
+        return $viewAuthUsers->user_type == "A" || $viewAuthUsers->username == $transaction->vcard;
     }
 
     /**
@@ -45,7 +45,7 @@ class TransactionPolicy
      */
     public function delete(ViewAuthUsers $viewAuthUsers, Transaction $transaction): bool
     {
-        //
+        return $viewAuthUsers->user_type == "A";
     }
 
     /**
@@ -53,7 +53,7 @@ class TransactionPolicy
      */
     public function restore(ViewAuthUsers $viewAuthUsers, Transaction $transaction): bool
     {
-        //
+        return $viewAuthUsers->user_type == "A";
     }
 
     /**
