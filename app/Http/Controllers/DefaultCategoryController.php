@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DefaultCategory;
-
+use App\Http\Resources\CategoryResource;
+use App\Http\Requests\StoreDefaultCategoryRequest;
 use Illuminate\Support\Facades\Log;
 
 class DefaultCategoryController extends Controller
@@ -21,9 +22,13 @@ class DefaultCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDefaultCategoryRequest $request)
     {
-        //
+        Log::info($request);
+        $category = new DefaultCategory();
+        $category->fill($request->validated());
+        $category->save();
+        return new CategoryResource($category);
     }
 
     /**
