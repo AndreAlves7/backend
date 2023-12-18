@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardRequest;
 use Carbon\Carbon;
+use App\Http\Resources\CategoryResource;
 
 class VcardController extends Controller
 {
