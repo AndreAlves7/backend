@@ -62,7 +62,7 @@ class CategoryPolicy
      */
     public function forceDelete(ViewAuthUsers $viewAuthUsers, Category $category): bool
     {
-        //
+        return $viewAuthUsers->username == $category->vcard;
     }
 
     public function viewVcardCategories(ViewAuthUsers $viewAuthUsers, string $vcard): bool
