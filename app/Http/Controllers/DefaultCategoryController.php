@@ -24,7 +24,7 @@ class DefaultCategoryController extends Controller
      */
     public function store(StoreDefaultCategoryRequest $request)
     {
-        Log::info($request);
+        $this->authorize('create', DefaultCategory::class);
         $category = new DefaultCategory();
         $category->fill($request->validated());
         $category->save();

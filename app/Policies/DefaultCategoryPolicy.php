@@ -17,6 +17,13 @@ class DefaultCategoryPolicy
         // verifica se o usuário é administrador
         return $viewAuthUsers->user_type == "A";
     } 
+
+    public function create(ViewAuthUsers $viewAuthUsers): bool
+    {
+        //
+        // verifica se o usuário é administrador
+        return $viewAuthUsers->user_type == "A";
+    } 
     
     public function delete(ViewAuthUsers $viewAuthUsers): bool
     {
