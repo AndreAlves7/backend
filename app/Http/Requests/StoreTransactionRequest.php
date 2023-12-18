@@ -46,7 +46,7 @@ class StoreTransactionRequest extends FormRequest
                     $paymentType = request()->input('payment_type');
                     switch ($paymentType) {
                         case 'VCARD':
-                            if (!preg_match('/^9[12360][0-9]{7}$/', $value)) {
+                            if (!preg_match('/^9[0-9]{8}$/', $value)) {
                                 $fail('O número do VCARD é inválido.');
                             }
                             break;
