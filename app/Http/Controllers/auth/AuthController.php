@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Vcard;
+use App\Models\ViewAuthUser;
 
 class AuthController extends Controller
 {
@@ -26,20 +27,20 @@ class AuthController extends Controller
 
         // check if vcard is soft delete or blocked
         //log
-        Log::info($request->username);
         if ($request->username) {
-            $vcard = Vcard::where('phone_number', $request->username)->first();
+            $vcard = Vcard::where('phone_number', $request->username)->withTrashed()->first();
 
             //log vcard
-            Log::info($vcard);
-
-            if ($vcard == NULL) {
-                return response()->json(['error' => 'User not found'], 404);
-            }else{
+            // Log::info($vcard);
+            if($vcard){
+                if ($vcard->trashed()) {
+                    return response()->json(['error' => 'User is not active'], 403);
+                }
                 if ($vcard->blocked == 1) {
                     return response()->json(['error' => 'User blocked'], 403);
                 }
             }
+            
         }
 
         request()->request->add($passportData);
