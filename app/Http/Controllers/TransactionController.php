@@ -92,18 +92,22 @@ class TransactionController extends Controller
                     $pair_transaction->date = $transaction->date;
                     $pair_transaction->datetime = $transaction->datetime;
                     // vai ser uma transação de crédito
-                    $pair_transaction->old_balance = $transaction->vcardAssociated->balance;
-                    $pair_transaction->new_balance = $transaction->vcardAssociated->balance + $transaction->value;
+
                     $pair_transaction->pair_transaction = $transaction->id;
-                    $pair_transaction->save();
 
                     $transaction->pair_transaction = $pair_transaction->id;
 
                     $transaction->pair_vcard = $pair_transaction->vcardAssociated->phone_number;
                     $pair_transaction->pair_vcard = $transaction->vcardAssociated->phone_number;
 
+                    $pair_transaction->old_balance = $transaction->pairVcardAssociated->balance;
+                    $pair_transaction->new_balance = $transaction->pairVcardAssociated->balance + $transaction->value;
+
+                    $pair_transaction->save();
+
                     $pairVcardAssociated = $pair_transaction->vcardAssociated;
                     $pairVcardAssociated->balance = $pair_transaction->new_balance;
+
                     $pairVcardAssociated->save();
                 } else {
                     // PAYMENT GATEWAY SERVICE
